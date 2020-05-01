@@ -3,10 +3,7 @@
 
 from time import strftime
 from colorama import init, Fore, Back, Style
-from locale import setlocale, LC_ALL
 from os import system, name
-
-setlocale(LC_ALL, 'turkish')
 
 def print_logo():
     logo = """{0}
