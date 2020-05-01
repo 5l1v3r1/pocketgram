@@ -7,6 +7,7 @@ __version__ = "1.0.0"
 
 from libs.helpers import error, info, ask, success
 from libs.helpers import report_account, clear_screen, print_logo
+from platform import uname
 from colorama import init
 from os import _exit
 from libs.website import website_app, SETTINGS
@@ -60,14 +61,20 @@ def main():
             SETTINGS["TRY_ACCOUNTS"] = True
 
     print("")
-    success("NGROK servisi başlatılıyor!")
-    public_url = ngrok.connect()
-    web_url = ngrok.connect(SETTINGS["PORT"], "http")
-    success("Port yönlendirme başarılı!")
+    if ("arm" not in uname().machine):
+        success("NGROK servisi başlatılıyor!")
+        public_url = ngrok.connect()
+        web_url = ngrok.connect(SETTINGS["PORT"], "http")
+        success("Port yönlendirme başarılı!")
+        print("")
+        success("Web sunucusu {0} adresinde açıldı!".format(web_url))
+        print("")
+    else:
+        error("Program Termux'dan çalıştırılıyor! NGROK'u 'ngrok http 80' komutuyla manuel başlatmalısınız!")
+        success("Web sunucusu http://localhost:{0} adresinde açıldı!".format(SETTINGS["PORT"]))
+        print("")
 
-    print("")
-    success("Web sunucusu {0} adresinde açıldı!".format(web_url))
-    print("")
+    
     http_server = WSGIServer(('0.0.0.0', SETTINGS["PORT"]), PathInfoDispatcher({'/': website_app}))
     http_server.start()
 
