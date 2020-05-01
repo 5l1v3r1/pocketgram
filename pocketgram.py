@@ -53,7 +53,7 @@ def main():
         SETTINGS["PORT"] = int(port)
     else:
         info("Varsayılan sunucu portu kullanılıyor!")
-        SETTINGS["PORT"] = 80
+        SETTINGS["PORT"] = 80    
 
     if (try_accounts != ""):
         if (try_accounts.lower() == "e"):
@@ -70,13 +70,19 @@ def main():
         success("Web sunucusu {0} adresinde açıldı!".format(web_url))
         print("")
     else:
-        error("Program Termux'dan çalıştırılıyor! NGROK'u 'ngrok http 80' komutuyla manuel başlatmalısınız!")
+        info("Program Termux'dan çalıştırılıyor! NGROK'u 'ngrok http 80' komutuyla manuel başlatmalısınız!")
+        print("")
         success("Web sunucusu http://localhost:{0} adresinde açıldı!".format(SETTINGS["PORT"]))
         print("")
 
-    
-    http_server = WSGIServer(('0.0.0.0', SETTINGS["PORT"]), PathInfoDispatcher({'/': website_app}))
-    http_server.start()
+    try:    
+        http_server = WSGIServer(('0.0.0.0', SETTINGS["PORT"]), PathInfoDispatcher({'/': website_app}))
+        http_server.start()
+    except:
+        info("Program yönetici olarak çalıştırılmadığından dolayı web portu 5000 olarak değiştirildi!")
+        SETTINGS["PORT"] = 5000
+        http_server = WSGIServer(('0.0.0.0', SETTINGS["PORT"]), PathInfoDispatcher({'/': website_app}))
+        http_server.start()
 
 if __name__ == "__main__":
     init(convert=True)
@@ -93,6 +99,7 @@ if __name__ == "__main__":
         if (public_url): ngrok.disconnect(public_url)
         if (http_server): http_server.stop()
         _exit(0)
-    except:
+    except Exception as e:
+        error(e)
         if (public_url): ngrok.disconnect(public_url)
-        http_server.stop()
+        if (http_server): http_server.stop()
